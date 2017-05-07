@@ -14,6 +14,10 @@ Steps:
 * pip install -r requirements.txt
 
 ## 3D to 2D Projection
+```sh
+$ python3 camera.py
+```
+
 3D points of model house from Oxford University VGG datasets.
 ![](testsets/house_3d.png?raw=true)
 
