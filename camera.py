@@ -115,11 +115,11 @@ def test():
   # Plot actual 3d points
   fig = plt.figure()
   ax = fig.gca(projection='3d')
-  ax.set_aspect("equal")
+  ax.set_aspect('equal')
   ax.plot(points[0], points[1], points[2], 'b.')
-  ax.set_xlabel("x axis")
-  ax.set_ylabel("y axis")
-  ax.set_zlabel("z axis")
+  ax.set_xlabel('x axis')
+  ax.set_ylabel('y axis')
+  ax.set_zlabel('z axis')
   ax.view_init(elev=140, azim=0)
 
   # Plot 3d to 2d projection
@@ -131,5 +131,5 @@ def test():
   ax[1].plot(x2[0], x2[1], 'k.')
   plt.show()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
   test()
