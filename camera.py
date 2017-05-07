@@ -35,7 +35,7 @@ class Camera(object):
     K, R = scipy.linalg.rq(self.P[:, :3]) """
     Q, R = np.linalg.qr(np.flipud(self.P).T)
     R = np.flipud(R.T)
-    return R[:,::-1], Q.T[::-1,:]
+    return R[:, ::-1], Q.T[::-1, :]
 
   def factor(self):
     """ Factorize the camera matrix P into K,R,t with P = K[R|t]
