@@ -9,7 +9,8 @@ class Camera(object):
      Must either supply P or K, R, t """
     if P is None:
       try:
-        P = np.dot(K, np.hstack([R, t]))
+        self.extrinsic = np.hstack([R, t])
+        P = np.dot(K, self.extrinsic)
       except TypeError as e:
         print('Invalid parameters to Camera. Must either supply P or K, R, t')
         raise 
@@ -55,19 +56,6 @@ class Camera(object):
 
     return self.K, self.R, self.t
 
-  def rotation_from_angle(self, deg):
-    """ Creates a 3D rotation matrix given an angle in degrees.
-      Positive angles rotates clockwise. E.g. 30 """
-    R = np.eye(3)
-    cos_angle = np.cos(np.deg2rad(deg))
-    sin_angle = np.sin(np.deg2rad(deg))
-
-    R[:2, :2] = np.array([
-      [cos_angle, sin_angle],
-      [-sin_angle, cos_angle],
-    ])
-    return R
-
   def center(self):
     """  Compute and return the camera center. """
     if self.c is not None:
@@ -79,6 +67,32 @@ class Camera(object):
       # P = [M|−MC]
       self.c = np.dot(-np.linalg.inv(self.c[:, :3]), self.c[:, -1])
     return self.c
+
+def rotation_mat_from_angles(x_angle, y_angle=0, z_angle=0):
+  """ Creates a 3D rotation matrix given a angles in degrees.
+  Positive angles rotates anti-clockwise. E.g. 30
+  Return: 3x3 rotation matrix """
+  ax = np.deg2rad(x_angle)
+  ay = np.deg2rad(y_angle)
+  az = np.deg2rad(z_angle)
+
+  rx = np.array([
+    [1, 0, 0],
+    [0, np.cos(ax), -np.sin(ax)],
+    [0, np.sin(ax), np.cos(ax)]
+  ])
+  ry = np.array([
+    [np.cos(ay), 0, np.sin(ay)],
+    [0, 1, 0],
+    [-np.sin(ay), 0, np.cos(ay)]
+  ])
+  rz = np.array([
+    [np.cos(az), -np.sin(az), 0],
+    [np.sin(az), np.cos(az), 0],
+    [0, 0, 1]
+  ])
+
+  return np.dot(np.dot(rx, ry), rz)
 
 def test():
   import matplotlib.pyplot as plt
@@ -108,7 +122,7 @@ def test():
   x = cam.project(points)
 
   rotation_angle = 20
-  rotation_mat = cam.rotation_from_angle(rotation_angle)
+  rotation_mat = rotation_mat_from_angles(rotation_angle)
   cam = Camera(K=K, R=rotation_mat, t=t)
   x2 = cam.project(points)
 
@@ -126,7 +140,7 @@ def test():
   f, ax = plt.subplots(2, sharex=True, sharey=True)
   plt.subplots_adjust(left=0.08, bottom=0.08, right=0.99, top=0.95, wspace=0, hspace=0.01)
   ax[0].set_aspect('equal')
-  ax[0].set_title('3D to 2D projection. Bottom rotated by {0}°'.format(rotation_angle))
+  ax[0].set_title('3D to 2D projection. Bottom x-axis rotated by {0}°'.format(rotation_angle))
   ax[0].plot(x[0], x[1], 'k.')  
   ax[1].plot(x2[0], x2[1], 'k.')
   plt.show()
