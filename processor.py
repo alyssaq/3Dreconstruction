@@ -23,7 +23,7 @@ def cart2hom(arr):
     """
     if arr.ndim == 1:
         return np.hstack([arr, 1])
-    return np.vstack([arr, np.ones(arr.shape[1])])
+    return np.asarray(np.vstack([arr, np.ones(arr.shape[1])]))
 
 
 def hom2cart(arr):
@@ -36,17 +36,5 @@ def hom2cart(arr):
     if num_rows == 1 or arr.ndim == 1:
         return arr
 
-    return arr[:num_rows - 1] / arr[num_rows - 1]
+    return np.asarray(arr[:num_rows - 1] / arr[num_rows - 1])
 
-
-def skew_symmetric_matrix(x):
-    """ Create a skew symmetric matrix *A* from a 3d vector *x*.
-        Property: np.cross(A, v) == np.dot(x, v)
-    :param x: 3d vector
-    :returns: 3 x 3 skew symmetric matrix from *x*
-    """
-    return np.array([
-        [0, -x[2], x[1]],
-        [x[2], 0, -x[0]],
-        [-x[1], x[0], 0]
-    ])
