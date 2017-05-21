@@ -36,3 +36,16 @@ def hom2cart(arr):
         return arr
 
     return arr[:num_rows - 1] / arr[num_rows - 1]
+
+
+def skew_symmetric_matrix(x):
+    """ Create a skew symmetric matrix *A* from a 3d vector *x*.
+        Property: np.cross(A, v) == np.dot(x, v)
+        :param x: 3d vector
+        :returns: 3 x 3 skew symmetric matrix from *x*
+    """
+    return np.array([
+        [0, -x[2], x[1]],
+        [x[2], 0, -x[0]],
+        [-x[1], x[0], 0]
+    ])
