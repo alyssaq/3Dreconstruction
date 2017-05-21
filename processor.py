@@ -3,7 +3,7 @@ import numpy as np
 
 def read_matrix(path, astype=np.float64):
     """ Reads a file containing a matrix where each line represents a point
-    and each point is tab or space separated. * are replaced with -1.
+        and each point is tab or space separated. * are replaced with -1.
     :param path: path to the file
     :parama astype: type to cast the numbers. Default: np.float64
     :returns: array of array of numbers
