@@ -18,8 +18,8 @@ def read_matrix(path, astype=np.float64):
 
 def cart2hom(arr):
     """ Convert catesian to homogenous points by appending a row of 1s
-      :param arr: array of shape (num_dimension x num_points)
-      :returns: array of shape ((num_dimension+1) x num_points) 
+    :param arr: array of shape (num_dimension x num_points)
+    :returns: array of shape ((num_dimension+1) x num_points) 
     """
     if arr.ndim == 1:
         return np.hstack([arr, 1])
@@ -28,8 +28,9 @@ def cart2hom(arr):
 
 def hom2cart(arr):
     """ Convert homogenous to catesian by dividing each row by the last row
-      :param arr: array of shape (num_dimension x num_points)
-      :returns: array of shape ((num_dimension-1) x num_points) iff d > 1 """
+    :param arr: array of shape (num_dimension x num_points)
+    :returns: array of shape ((num_dimension-1) x num_points) iff d > 1 
+    """
     # arr has shape: dimensions x num_points
     num_rows = len(arr)
     if num_rows == 1 or arr.ndim == 1:
@@ -41,8 +42,8 @@ def hom2cart(arr):
 def skew_symmetric_matrix(x):
     """ Create a skew symmetric matrix *A* from a 3d vector *x*.
         Property: np.cross(A, v) == np.dot(x, v)
-        :param x: 3d vector
-        :returns: 3 x 3 skew symmetric matrix from *x*
+    :param x: 3d vector
+    :returns: 3 x 3 skew symmetric matrix from *x*
     """
     return np.array([
         [0, -x[2], x[1]],
