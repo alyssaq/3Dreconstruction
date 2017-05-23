@@ -5,6 +5,7 @@
 Steps:
 1) Detect 2D points    
 2) Match 2D points across 2 images    
+3) Epipolar geometry    
 3a) If both intrinsic and extrinsic camera parameters are known, reconstruct with projection matrices.    
 3b) If only the intrinsic parameters are known, normalize coordinates and calculate the essential matrix.   
 3c) If neither intrinsic nor extrinsic parameters are known, calculate the fundamental matrix.
