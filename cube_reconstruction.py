@@ -5,6 +5,7 @@ import camera
 import processor
 import structure
 
+
 def plot_projection(p1, p2):
     plt.figure()
     plt.subplot(1, 2, 1)
@@ -17,6 +18,7 @@ def plot_projection(p1, p2):
     ax.set_aspect('equal')
     ax.plot(p2[0], p2[1], 'r.')
 
+
 def plot_cube(points3d, title=''):
     fig = plt.figure()
     fig.suptitle(title, fontsize=16)
@@ -28,20 +30,21 @@ def plot_cube(points3d, title=''):
     ax.set_zlabel('z axis')
     ax.view_init(elev=135, azim=90)
 
-size = 300 # size of image in pixels
+
+size = 300  # size of image in pixels
 center = size / 2
 intrinsic = np.array([
-  [size, 0, center],
-  [0, size, center],
-  [0, 0, 1]
+    [size, 0, center],
+    [0, size, center],
+    [0, 0, 1]
 ])
 
 # Points of on the surface of the cube
 points3d = np.array([
-  [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 2, 1, 2],
-  [2, 1, 0, 2, 1, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, -1,-1, -1, -2, -2, -2, 0, 0, -1, -1, -2, -2],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 2, 1, 2],
+    [2, 1, 0, 2, 1, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, -1, -1, -1, -2, -2, -2, 0, 0, -1, -1, -2, -2],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ])
 
 # Project 3d points to camera 1 on the left
@@ -99,10 +102,10 @@ for i, P2 in enumerate(P2s):
     d2 = np.dot(P2, X)[2]
 
     if sum(d1 > 0) + sum(d2 > 0) > depth:
-      ind = i
-      tripoints3d = X
-      depth = sum(d1>0) + sum(d2>0)
-      infront = (d1>0) & (d2>0)
+        ind = i
+        tripoints3d = X
+        depth = sum(d1 > 0) + sum(d2 > 0)
+        infront = (d1 > 0) & (d2 > 0)
 
 print('ind', ind, depth)
 print('Num points triangulated', X.shape[1], tripoints3d.shape[1])

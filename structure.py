@@ -60,7 +60,7 @@ def plot_epipolar_line(p1, p2, F, show_epipole=False):
     maxes = np.max(p1, 1)
 
     # epipolar line parameter and values
-    xpts = np.linspace(mins[0]-pad[0], maxes[0]+pad[0], 100)
+    xpts = np.linspace(mins[0] - pad[0], maxes[0] + pad[0], 100)
     for line in lines.T:
         ypts = np.asarray([(line[2] + line[0] * p) / (-line[1]) for p in xpts])
         valid_idx = ((ypts >= mins[1] - pad[1]) & (ypts <= maxes[1] + pad[1]))
@@ -79,10 +79,11 @@ def skew(x):
     :returns: 3 x 3 skew symmetric matrix from *x*
     """
     return np.array([
-        [0, -x[2], x[1]], 
-        [x[2], 0, -x[0]], 
+        [0, -x[2], x[1]],
+        [x[2], 0, -x[0]],
         [-x[1], x[0], 0]
     ])
+
 
 def compute_P(p2d, p3d):
     """ Compute camera matrix from pairs of
@@ -95,10 +96,10 @@ def compute_P(p2d, p3d):
     # create matrix for DLT solution
     M = np.zeros((3 * n, 12 + n))
     for i in range(n):
-        M[3*i, 0:4] = p3d[:, i]
-        M[3*i+1, 4:8] = p3d[:, i]
-        M[3*i+2, 8:12] = p3d[:, i]
-        M[3*i:3*i+3, i+12] = -p2d[:, i]
+        M[3 * i, 0:4] = p3d[:, i]
+        M[3 * i + 1, 4:8] = p3d[:, i]
+        M[3 * i + 2, 8:12] = p3d[:, i]
+        M[3 * i:3 * i + 3, i + 12] = -p2d[:, i]
 
     U, S, V = np.linalg.svd(M)
     return V[-1, :12].reshape((3, 4))
@@ -126,9 +127,9 @@ def compute_P_from_essential(E):
     # create matrices (Hartley p 258)
     W = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
     P2 = [np.vstack((np.dot(U, np.dot(W, V)).T, U[:, 2])).T,
-        np.vstack((np.dot(U, np.dot(W, V)).T, -U[:, 2])).T,
-        np.vstack((np.dot(U, np.dot(W.T, V)).T, U[:, 2])).T,
-        np.vstack((np.dot(U, np.dot(W.T, V)).T, -U[:, 2])).T]
+          np.vstack((np.dot(U, np.dot(W, V)).T, -U[:, 2])).T,
+          np.vstack((np.dot(U, np.dot(W.T, V)).T, U[:, 2])).T,
+          np.vstack((np.dot(U, np.dot(W.T, V)).T, -U[:, 2])).T]
 
     return P2
 
@@ -136,10 +137,10 @@ def compute_P_from_essential(E):
 def correspondence_matrix(p1, p2):
     p1x, p1y = p1[:2]
     p2x, p2y = p2[:2]
-    
+
     return np.array([
-        p2x * p1x, p2x * p1y, p2x, 
-        p2y * p1x, p2y * p1y, p2y, 
+        p2x * p1x, p2x * p1y, p2x,
+        p2y * p1x, p2y * p1y, p2y,
         p1x, p1y, np.ones(len(p1x))
     ]).T
 
@@ -180,8 +181,8 @@ def normalize_points(points):
     dist = np.sqrt(np.power(cx, 2) + np.power(cy, 2))
     scale = np.sqrt(2) / dist.mean()
     norm3d = np.array([
-        [scale, 0, -scale*center[0]],
-        [0, scale, -scale*center[1]],
+        [scale, 0, -scale * center[0]],
+        [0, scale, -scale * center[1]],
         [0, 0, 1]
     ])
 
@@ -217,4 +218,3 @@ def compute_fundamental_normalized(p1, p2):
 
 def compute_essential_normalized(p1, p2):
     return compute_normalized_image_to_image_matrix(p1, p2, compute_essential=True)
-    

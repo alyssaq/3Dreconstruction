@@ -37,4 +37,3 @@ def hom2cart(arr):
         return arr
 
     return np.asarray(arr[:num_rows - 1] / arr[num_rows - 1])
-
