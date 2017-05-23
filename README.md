@@ -18,7 +18,7 @@ Steps:
 * Install [opencv](http://opencv.org/)
 * pip install -r requirements.txt
 
-## Sample 3D cube reconstruction
+## Example 3D cube reconstruction
 ```sh
 $ python3 cube_reconstruction.py
 ```
