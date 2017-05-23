@@ -14,7 +14,7 @@ Steps:
 6. Bundle adjustment to minimize reprojection errors and refine the 3D coordinates.
 
 ## Prerequisites
-* Python 3.3+
+* Python 3.5+
 * Install [opencv](http://opencv.org/)
 * pip install -r requirements.txt
 
