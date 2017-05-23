@@ -3,7 +3,7 @@ import matplotlib.pylab as plt
 from mpl_toolkits.mplot3d import Axes3D
 import camera
 import processor
-import eightpoint
+import structure
 
 def plot_projection(p1, p2):
     plt.figure()
@@ -73,20 +73,20 @@ points2 = c2.project(points3d)
 points2 = processor.cart2hom(points2[:2])
 
 # True essential matrix E = [t]R
-E = np.dot(eightpoint.skew(translation_mat_wrt_c1), rotation_mat_wrt_c1)
+E = np.dot(structure.skew(translation_mat_wrt_c1), rotation_mat_wrt_c1)
 print('Original essential matrix:', E)
 
 # Calculate essential matrix with 2d points.
 # Result will be up to a scale
 points1n = np.dot(np.linalg.inv(intrinsic), points1)
 points2n = np.dot(np.linalg.inv(intrinsic), points2)
-E = eightpoint.compute_essential_normalized(points1n, points2n)
+E = structure.compute_essential_normalized(points1n, points2n)
 print('Computed essential matrix:', E)
 
 # Given we are at camera 1, calculate the parameters for camera 2
 # Using the essential matrix returns 4 possible camera paramters
 P1 = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]])
-P2s = eightpoint.compute_P_from_essential(E)
+P2s = structure.compute_P_from_essential(E)
 
 # pick the solution with most points in front of camera
 depth = 0
@@ -94,7 +94,7 @@ tripoints3d = None
 ind = -1
 for i, P2 in enumerate(P2s):
     # triangulate inliers and compute depth for each camera
-    X = eightpoint.linear_triangulation(points1n, points2n, P1, P2)
+    X = structure.linear_triangulation(points1n, points2n, P1, P2)
     d1 = np.dot(P1, X)[2]
     d2 = np.dot(P2, X)[2]
 
@@ -108,7 +108,7 @@ print('ind', ind, depth)
 print('Num points triangulated', X.shape[1], tripoints3d.shape[1])
 
 plt.figure()
-eightpoint.plot_epipolar_lines(points1n, points2n, E)
+structure.plot_epipolar_lines(points1n, points2n, E)
 plot_projection(points1, points2)
 plot_cube(points3d, 'Original')
 plot_cube(tripoints3d[:, infront], '3D reconstructed')
