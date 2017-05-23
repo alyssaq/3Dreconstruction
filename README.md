@@ -27,3 +27,7 @@ Projected points
 ## Datasets
 * Oxford University, Visual Geometry Group: http://www.robots.ox.ac.uk/~vgg/data/data-mview.html
 * EPFL computer vision lab: http://cvlabwww.epfl.ch/data/multiview/knownInternalsMVS.html
+
+## References
+* [Eight point algorithm](http://ece631web.groups.et.byu.net/Lectures/ECEn631%2013%20-%208%20Point%20Algorithm.pdf)
+* [Multiple View Geometry in Computer Vision (Hartley & Zisserman)](http://www.robots.ox.ac.uk/~vgg/hzbook/)
