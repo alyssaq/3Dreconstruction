@@ -76,16 +76,19 @@ def rotation_mat_from_angles(x_angle, y_angle=0, z_angle=0):
   ay = np.deg2rad(y_angle)
   az = np.deg2rad(z_angle)
 
+  # Rotation matrix around x-axis
   rx = np.array([
     [1, 0, 0],
     [0, np.cos(ax), -np.sin(ax)],
     [0, np.sin(ax), np.cos(ax)]
   ])
+  # Rotation matrix around y-axis
   ry = np.array([
     [np.cos(ay), 0, np.sin(ay)],
     [0, 1, 0],
     [-np.sin(ay), 0, np.cos(ay)]
   ])
+  # Rotation matrix around z-axis
   rz = np.array([
     [np.cos(az), -np.sin(az), 0],
     [np.sin(az), np.cos(az), 0],
