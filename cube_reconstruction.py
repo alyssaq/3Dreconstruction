@@ -6,17 +6,15 @@ import processor
 import structure
 
 
-def plot_projection(p1, p2):
-    plt.figure()
-    plt.subplot(1, 2, 1)
-    ax = plt.gca()
-    ax.set_aspect('equal')
-    ax.plot(p1[0], p1[1], 'r.')
+def plot_projections(points):
+    num_images = len(points)
 
-    plt.subplot(1, 2, 2)
-    ax = plt.gca()
-    ax.set_aspect('equal')
-    ax.plot(p2[0], p2[1], 'r.')
+    plt.figure()
+    for i in range(num_images):
+        plt.subplot(1, num_images, i+1)
+        ax = plt.gca()
+        ax.set_aspect('equal')
+        ax.plot(points[i][0], points[i][1], 'r.')
 
 
 def plot_cube(points3d, title=''):
@@ -29,6 +27,18 @@ def plot_cube(points3d, title=''):
     ax.set_ylabel('y axis')
     ax.set_zlabel('z axis')
     ax.view_init(elev=135, azim=90)
+
+
+def extrinsic_from_camera_pose(m_c1_wrt_c2):
+    # Inverse to get extrinsic matrix from camera to world view
+    # http://ksimek.github.io/2012/08/22/extrinsic/
+    # Returns homogenous 4x4 extrinsic camera matrix
+    # Alternatively, R = R^t, T = -RC
+    # Rct = m_c1_wrt_c2[:3, :3].T
+    # t = -np.dot(Rct, m_c1_wrt_c2[:3, 3])
+    H_m = np.vstack([m_c1_wrt_c2, [0, 0, 0, 1]])
+    ext = np.linalg.inv(H_m)
+    return ext
 
 
 size = 300  # size of image in pixels
@@ -47,27 +57,26 @@ points3d = np.array([
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 ])
 
-# Project 3d points to camera 1 on the left
-rotation_mat = camera.rotation_mat_from_angles(75, 0, 60)
+# Define pose of cube with respect to camera1 in world view
+rotation_mat = camera.rotation_mat_from_angles(10, 0, 0)
 translation_mat = np.matrix([0, 0, 5]).T
 c = camera.Camera(K=intrinsic, R=rotation_mat, t=translation_mat)
+
+# Project 3d points to camera1 on the left
 points1 = c.project(points3d)
 points1 = processor.cart2hom(points1)
-#np.savetxt('points2d_left.txt', points2d[:2].T, fmt='%.10f')
 
 # Get 4x4 homogenous extrinsic parameters of camera 1
 H_c1 = np.vstack([c.extrinsic, [0, 0, 0, 1]])
 
-# Calculate pose of the model wrt camera 2
-# Create camera 2 extrinsic matrix wrt to camera 1
-rotation_mat_wrt_c1 = camera.rotation_mat_from_angles(0, -25, 0)
+# Define rotation of camera1 wrt camera2 and
+# translation of camera2 wrt camera1
+rotation_mat_wrt_c1 = camera.rotation_mat_from_angles(0, 0, 0)
 translation_mat_wrt_c1 = np.matrix([3, 0, 1]).T
-c2_extrinsic = np.hstack([rotation_mat_wrt_c1, translation_mat_wrt_c1])
-# Get 4x4 homogenous extrinsic parameters of camera 2 wrt camera 1
-H_c2_c1 = np.vstack([c2_extrinsic, [0, 0, 0, 1]])
+H_c2_c1 = np.hstack([rotation_mat_wrt_c1, translation_mat_wrt_c1])
+H_c1_c2 = extrinsic_from_camera_pose(H_c2_c1)
 
-# Get extrinsic parameters of camera 2
-H_c1_c2 = np.linalg.inv(H_c2_c1)
+# Calculate pose of model wrt to camera2 in world view
 H_c2 = np.dot(H_c1_c2, H_c1)
 
 # Project 3d points to camera 2 on the right
@@ -81,38 +90,58 @@ print('Original essential matrix:', E)
 
 # Calculate essential matrix with 2d points.
 # Result will be up to a scale
+# First, normalize points
 points1n = np.dot(np.linalg.inv(intrinsic), points1)
 points2n = np.dot(np.linalg.inv(intrinsic), points2)
 E = structure.compute_essential_normalized(points1n, points2n)
-print('Computed essential matrix:', E)
+print('Computed essential matrix:', -E / E[0][1])
 
 # Given we are at camera 1, calculate the parameters for camera 2
 # Using the essential matrix returns 4 possible camera paramters
 P1 = np.array([[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]])
 P2s = structure.compute_P_from_essential(E)
 
-# pick the solution with most points in front of camera
-depth = 0
-tripoints3d = None
 ind = -1
 for i, P2 in enumerate(P2s):
-    # triangulate inliers and compute depth for each camera
-    X = structure.linear_triangulation(points1n, points2n, P1, P2)
-    d1 = np.dot(P1, X)[2]
-    d2 = np.dot(P2, X)[2]
+    # Find the correct camera parameters
+    d1 = structure.reconstruct_one_point(points1n[:, 0], points2n[:, 0], P1, P2)
+    P2_homogenous = extrinsic_from_camera_pose(P2)
+    d2 = np.dot(P2_homogenous[:3, :4], d1)
 
-    if sum(d1 > 0) + sum(d2 > 0) > depth:
+    if d1[2] > 0 and d2[2] > 0:
         ind = i
-        tripoints3d = X
-        depth = sum(d1 > 0) + sum(d2 > 0)
-        infront = (d1 > 0) & (d2 > 0)
 
-print('ind', ind, depth)
-print('Num points triangulated', X.shape[1], tripoints3d.shape[1])
+print('True pose of c2 wrt c1: ', H_c2)
+
+P2 = np.linalg.inv(np.vstack([P2s[ind], [0, 0, 0, 1]]))[:3, :4]
+print(P2)
+tripoints3d = structure.reconstruct_points(points1n, points2n, P1, P2)
+tripoints3d = structure.linear_triangulation(points1n, points2n, P1, P2)
+# pick the solution with most points in front of camera
+# depth = 0
+# tripoints3d = None
+# ind = -1
+# for i, P2 in enumerate(P2s):
+#     # triangulate inliers and compute depth for each camera
+#     #X = structure.linear_triangulation(points1n, points2n, P1, P2)
+#     X = structure.reconstruct(points1n[:, 0], points2n[:, 0], P1, P2)
+#     print(X)
+#     d1 = np.dot(P1, X)[2]
+#     d2 = np.dot(P2, X)[2]
+
+#     print(d1[2], d2[2])
+#     if sum(d1 > 0) + sum(d2 > 0) > depth:
+#         ind = i
+#         tripoints3d = X
+#         depth = sum(d1 > 0) + sum(d2 > 0)
+#         infront = (d1 > 0) & (d2 > 0)
+
+# print('ind', ind, depth)
+# print('Num points triangulated', X.shape[1], tripoints3d.shape[1])
 
 plt.figure()
 structure.plot_epipolar_lines(points1n, points2n, E)
-plot_projection(points1, points2)
+plot_projections([points1, points2])
 plot_cube(points3d, 'Original')
-plot_cube(tripoints3d[:, infront], '3D reconstructed')
+plot_cube(tripoints3d, '3D reconstructed')
 plt.show()
