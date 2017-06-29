@@ -10,6 +10,7 @@ def reconstruct_points(p1, p2, m1, m2):
 
     return res
 
+
 def reconstruct_one_point(pt1, pt2, m1, m2):
     """
         pt1 and m1 * X are parallel and cross product = 0
@@ -24,23 +25,24 @@ def reconstruct_one_point(pt1, pt2, m1, m2):
 
     return P / P[3]
 
-def linear_triangulation(x1, x2, p1, p2):
+
+def linear_triangulation(p1, p2, m1, m2):
     """
     Linear triangulation (Hartley ch 12.2 pg 312) to find the 3D point X
-    where x1 = p1 * X and x2 = p2 * X. Solve AX = 0.
-    :param x1, x2: 2D points in homo. or catesian coordinates. Shape (2 x n)
-    :param p1, p2: Camera matrices associated with x1 and x2. Shape (3 x 4)
+    where p1 = m1 * X and p2 = m2 * X. Solve AX = 0.
+    :param p1, p2: 2D points in homo. or catesian coordinates. Shape (2 x n)
+    :param m1, m2: Camera matrices associated with p1 and p2. Shape (3 x 4)
     :returns: 4 x n homogenous 3d triangulated points
     """
-    num_points = x1.shape[1]
+    num_points = p1.shape[1]
     res = np.ones((4, num_points))
 
     for i in range(num_points):
         A = np.asarray([
-            (x1[0, i] * p1[2, :] - p1[0, :]),
-            (x1[1, i] * p1[2, :] - p1[1, :]),
-            (x2[0, i] * p2[2, :] - p2[0, :]),
-            (x2[1, i] * p2[2, :] - p2[1, :])
+            (p1[0, i] * m1[2, :] - m1[0, :]),
+            (p1[1, i] * m1[2, :] - m1[1, :]),
+            (p2[0, i] * m2[2, :] - m2[0, :]),
+            (p2[1, i] * m2[2, :] - m2[1, :])
         ])
 
         _, _, V = np.linalg.svd(A)
