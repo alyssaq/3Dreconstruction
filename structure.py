@@ -146,7 +146,7 @@ def compute_P_from_essential(E):
     :returns: list of 4 possible camera matrices.
     """
     U, S, V = np.linalg.svd(E)
-    print(np.linalg.det(np.dot(U, V)))
+
     # Ensure rotation matrix are right-handed with positive determinant
     if np.linalg.det(np.dot(U, V)) < 0:
         V = -V

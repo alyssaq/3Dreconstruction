@@ -27,7 +27,7 @@ def plot_cube(points3d, title=''):
     ax.set_ylabel('y axis')
     ax.set_zlabel('z axis')
     ax.view_init(elev=135, azim=90)
-
+    return ax
 
 def extrinsic_from_camera_pose(m_c1_wrt_c2):
     # Inverse to get extrinsic matrix from camera to world view
@@ -58,10 +58,11 @@ points3d = np.array([
 ])
 
 # Define pose of cube with respect to camera1 in world view
-rotation_mat = camera.rotation_mat_from_angles(10, 0, 0)
+rotation_mat = camera.rotation_mat_from_angles(120, 0, 60)
 translation_mat = np.matrix([0, 0, 5]).T
 c = camera.Camera(K=intrinsic, R=rotation_mat, t=translation_mat)
 
+print(c.extrinsic)
 # Project 3d points to camera1 on the left
 points1 = c.project(points3d)
 points1 = processor.cart2hom(points1)
@@ -71,14 +72,16 @@ H_c1 = np.vstack([c.extrinsic, [0, 0, 0, 1]])
 
 # Define rotation of camera1 wrt camera2 and
 # translation of camera2 wrt camera1
-rotation_mat_wrt_c1 = camera.rotation_mat_from_angles(0, 0, 0)
+rotation_mat_wrt_c1 = camera.rotation_mat_from_angles(0, -25, 0)
 translation_mat_wrt_c1 = np.matrix([3, 0, 1]).T
 H_c2_c1 = np.hstack([rotation_mat_wrt_c1, translation_mat_wrt_c1])
+print(H_c2_c1)
 H_c1_c2 = extrinsic_from_camera_pose(H_c2_c1)
+print(H_c1_c2)
 
 # Calculate pose of model wrt to camera2 in world view
 H_c2 = np.dot(H_c1_c2, H_c1)
-
+print(H_c2)
 # Project 3d points to camera 2 on the right
 c2 = camera.Camera(K=intrinsic, R=H_c2[:3, :3], t=H_c2[:3, 3])
 points2 = c2.project(points3d)
@@ -94,7 +97,7 @@ print('Original essential matrix:', E)
 points1n = np.dot(np.linalg.inv(intrinsic), points1)
 points2n = np.dot(np.linalg.inv(intrinsic), points2)
 E = structure.compute_essential_normalized(points1n, points2n)
-print('Computed essential matrix:', -E / E[0][1])
+print('Computed essential matrix:', (-E / E[0][1]))
 
 # Given we are at camera 1, calculate the parameters for camera 2
 # Using the essential matrix returns 4 possible camera paramters
@@ -142,6 +145,26 @@ tripoints3d = structure.linear_triangulation(points1n, points2n, P1, P2)
 plt.figure()
 structure.plot_epipolar_lines(points1n, points2n, E)
 plot_projections([points1, points2])
-plot_cube(points3d, 'Original')
+
+def camera_corners(camera, dist=0.25):
+    d = dist
+    x, y, z = np.ravel(camera.t)
+    corners = np.array([
+        [x-d, y+d, z],
+        [x+d, y+d, z],
+        [x+d, y-d, z],
+        [x-d, y-d, z],
+        [x-d, y+d, z]
+    ]).T
+
+    return np.asarray(np.dot(camera.R, corners))
+
+ax = plot_cube(points3d, 'Original')
+
+cam_corners1 = camera_corners(c)
+cam_corners2 = camera_corners(c2)
+ax.plot(cam_corners1[0], cam_corners1[1], cam_corners1[2], 'g-')
+ax.plot(cam_corners2[0], cam_corners2[1], cam_corners2[2], 'r-')
+
 plot_cube(tripoints3d, '3D reconstructed')
 plt.show()
