@@ -4,6 +4,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import camera
 import processor
 import structure
+import transformers
 
 
 def plot_projections(points):
@@ -58,7 +59,7 @@ points3d = np.array([
 ])
 
 # Define pose of cube with respect to camera1 in world view
-rotation_mat = camera.rotation_mat_from_angles(120, 0, 60)
+rotation_mat = transformers.rotation_3d_from_angles(120, 0, 60)
 translation_mat = np.matrix([0, 0, 5]).T
 c = camera.Camera(K=intrinsic, R=rotation_mat, t=translation_mat)
 
@@ -72,7 +73,7 @@ H_c1 = np.vstack([c.extrinsic, [0, 0, 0, 1]])
 
 # Define rotation of camera1 wrt camera2 and
 # translation of camera2 wrt camera1
-rotation_mat_wrt_c1 = camera.rotation_mat_from_angles(0, -25, 0)
+rotation_mat_wrt_c1 = transformers.rotation_3d_from_angles(0, -25, 0)
 translation_mat_wrt_c1 = np.matrix([3, 0, 1]).T
 H_c2_c1 = np.hstack([rotation_mat_wrt_c1, translation_mat_wrt_c1])
 print(H_c2_c1)

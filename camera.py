@@ -1,11 +1,12 @@
 import numpy as np
 import processor
+import transformers
 
 class Camera(object):
   """ Class for representing pin-hole camera """
 
   def __init__(self, P=None, K=None, R=None, t=None):
-    """ P = K[R|t] camera model. (3 x 4) 
+    """ P = K[R|t] camera model. (3 x 4)
      Must either supply P or K, R, t """
     if P is None:
       try:
@@ -13,7 +14,7 @@ class Camera(object):
         P = np.dot(K, self.extrinsic)
       except TypeError as e:
         print('Invalid parameters to Camera. Must either supply P or K, R, t')
-        raise 
+        raise
 
     self.P = P     # camera matrix
     self.K = K     # intrinsic matrix
@@ -32,7 +33,7 @@ class Camera(object):
 
   def qr_to_rq_decomposition(self):
     """ Convert QR to RQ decomposition with numpy.
-    Note that this could be done by passing in a square matrix with scipy: 
+    Note that this could be done by passing in a square matrix with scipy:
     K, R = scipy.linalg.rq(self.P[:, :3]) """
     Q, R = np.linalg.qr(np.flipud(self.P).T)
     R = np.flipud(R.T)
@@ -68,34 +69,6 @@ class Camera(object):
       self.c = np.dot(-np.linalg.inv(self.c[:, :3]), self.c[:, -1])
     return self.c
 
-def rotation_mat_from_angles(x_angle, y_angle=0, z_angle=0):
-  """ Creates a 3D rotation matrix given a angles in degrees.
-  Positive angles rotates anti-clockwise. E.g. 30
-  Return: 3x3 rotation matrix """
-  ax = np.deg2rad(x_angle)
-  ay = np.deg2rad(y_angle)
-  az = np.deg2rad(z_angle)
-
-  # Rotation matrix around x-axis
-  rx = np.array([
-    [1, 0, 0],
-    [0, np.cos(ax), -np.sin(ax)],
-    [0, np.sin(ax), np.cos(ax)]
-  ])
-  # Rotation matrix around y-axis
-  ry = np.array([
-    [np.cos(ay), 0, np.sin(ay)],
-    [0, 1, 0],
-    [-np.sin(ay), 0, np.cos(ay)]
-  ])
-  # Rotation matrix around z-axis
-  rz = np.array([
-    [np.cos(az), -np.sin(az), 0],
-    [np.sin(az), np.cos(az), 0],
-    [0, 0, 1]
-  ])
-
-  return np.dot(np.dot(rx, ry), rz)
 
 def test():
   import matplotlib.pyplot as plt
@@ -125,7 +98,7 @@ def test():
   x = cam.project(points)
 
   rotation_angle = 20
-  rotation_mat = rotation_mat_from_angles(rotation_angle)
+  rotation_mat = transformers.rotation_3d_from_angles(rotation_angle)
   cam = Camera(K=K, R=rotation_mat, t=t)
   x2 = cam.project(points)
 
@@ -144,7 +117,7 @@ def test():
   plt.subplots_adjust(left=0.08, bottom=0.08, right=0.99, top=0.95, wspace=0, hspace=0.01)
   ax[0].set_aspect('equal')
   ax[0].set_title('3D to 2D projection. Bottom x-axis rotated by {0}°'.format(rotation_angle))
-  ax[0].plot(x[0], x[1], 'k.')  
+  ax[0].plot(x[0], x[1], 'k.')
   ax[1].plot(x2[0], x2[1], 'k.')
   plt.show()
 
