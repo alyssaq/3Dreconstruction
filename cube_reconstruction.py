@@ -76,21 +76,19 @@ H_c1 = np.vstack([c.extrinsic, [0, 0, 0, 1]])
 rotation_mat_wrt_c1 = transformers.rotation_3d_from_angles(0, -25, 0)
 translation_mat_wrt_c1 = np.matrix([3, 0, 1]).T
 H_c2_c1 = np.hstack([rotation_mat_wrt_c1, translation_mat_wrt_c1])
-print(H_c2_c1)
 H_c1_c2 = extrinsic_from_camera_pose(H_c2_c1)
-print(H_c1_c2)
 
 # Calculate pose of model wrt to camera2 in world view
 H_c2 = np.dot(H_c1_c2, H_c1)
-print(H_c2)
+
 # Project 3d points to camera 2 on the right
 c2 = camera.Camera(K=intrinsic, R=H_c2[:3, :3], t=H_c2[:3, 3])
 points2 = c2.project(points3d)
 points2 = processor.cart2hom(points2[:2])
 
 # True essential matrix E = [t]R
-E = np.dot(structure.skew(translation_mat_wrt_c1), rotation_mat_wrt_c1)
-print('Original essential matrix:', E)
+true_E = np.dot(structure.skew(translation_mat_wrt_c1), rotation_mat_wrt_c1)
+print('True essential matrix:', true_E)
 
 # Calculate essential matrix with 2d points.
 # Result will be up to a scale
@@ -99,6 +97,12 @@ points1n = np.dot(np.linalg.inv(intrinsic), points1)
 points2n = np.dot(np.linalg.inv(intrinsic), points2)
 E = structure.compute_essential_normalized(points1n, points2n)
 print('Computed essential matrix:', (-E / E[0][1]))
+
+# True fundamental matrix F = K^-t E K^-1
+true_F = np.dot(np.dot(np.linalg.inv(intrinsic).T, true_E), np.linalg.inv(intrinsic))
+F = structure.compute_fundamental_normalized(points1, points2)
+print('True fundamental matrix:', true_F)
+print('Computed fundamental matrix:', (F * true_F[2][2]))
 
 # Given we are at camera 1, calculate the parameters for camera 2
 # Using the essential matrix returns 4 possible camera paramters
@@ -115,33 +119,13 @@ for i, P2 in enumerate(P2s):
     if d1[2] > 0 and d2[2] > 0:
         ind = i
 
-print('True pose of c2 wrt c1: ', H_c2)
-
+print('True pose of c2 wrt c1: ', H_c1_c2)
 P2 = np.linalg.inv(np.vstack([P2s[ind], [0, 0, 0, 1]]))[:3, :4]
-print(P2)
+P2f = structure.compute_P_from_fundamental(F)
+print('Calculated camera 2 parameters:' , P2, P2f)
+
 tripoints3d = structure.reconstruct_points(points1n, points2n, P1, P2)
 tripoints3d = structure.linear_triangulation(points1n, points2n, P1, P2)
-# pick the solution with most points in front of camera
-# depth = 0
-# tripoints3d = None
-# ind = -1
-# for i, P2 in enumerate(P2s):
-#     # triangulate inliers and compute depth for each camera
-#     #X = structure.linear_triangulation(points1n, points2n, P1, P2)
-#     X = structure.reconstruct(points1n[:, 0], points2n[:, 0], P1, P2)
-#     print(X)
-#     d1 = np.dot(P1, X)[2]
-#     d2 = np.dot(P2, X)[2]
-
-#     print(d1[2], d2[2])
-#     if sum(d1 > 0) + sum(d2 > 0) > depth:
-#         ind = i
-#         tripoints3d = X
-#         depth = sum(d1 > 0) + sum(d2 > 0)
-#         infront = (d1 > 0) & (d2 > 0)
-
-# print('ind', ind, depth)
-# print('Num points triangulated', X.shape[1], tripoints3d.shape[1])
 
 plt.figure()
 structure.plot_epipolar_lines(points1n, points2n, E)
