@@ -151,14 +151,14 @@ def compute_P_from_essential(E):
     if np.linalg.det(np.dot(U, V)) < 0:
         V = -V
 
-    # create matrices (Hartley p 258)
+    # create 4 possible camera matrices (Hartley p 258)
     W = np.array([[0, -1, 0], [1, 0, 0], [0, 0, 1]])
-    P2 = [np.vstack((np.dot(U, np.dot(W, V)).T, U[:, 2])).T,
+    P2s = [np.vstack((np.dot(U, np.dot(W, V)).T, U[:, 2])).T,
           np.vstack((np.dot(U, np.dot(W, V)).T, -U[:, 2])).T,
           np.vstack((np.dot(U, np.dot(W.T, V)).T, U[:, 2])).T,
           np.vstack((np.dot(U, np.dot(W.T, V)).T, -U[:, 2])).T]
 
-    return P2
+    return P2s
 
 
 def correspondence_matrix(p1, p2):
@@ -201,7 +201,7 @@ def compute_image_to_image_matrix(x1, x2, compute_essential=False):
 
 def scale_and_translate_points(points):
     """ Scale and translate image points so that centroid of the points
-        are at the origin and avg distance to the origin is euqal to sqrt(2).
+        are at the origin and avg distance to the origin is equal to sqrt(2).
     :param points: array of homogenous point (3 x n)
     :returns: array of same input shape and its normalization matrix
     """
