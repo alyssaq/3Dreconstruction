@@ -11,6 +11,7 @@ def plot_projections(points):
     num_images = len(points)
 
     plt.figure()
+    plt.suptitle('3D to 2D Projections', fontsize=16)
     for i in range(num_images):
         plt.subplot(1, num_images, i+1)
         ax = plt.gca()
@@ -42,6 +43,20 @@ def extrinsic_from_camera_pose(m_c1_wrt_c2):
     return ext
 
 
+def camera_corners(camera, dist=0.25):
+    d = dist
+    x, y, z = np.ravel(camera.t)
+    corners = np.array([
+        [x-d, y+d, z],
+        [x+d, y+d, z],
+        [x+d, y-d, z],
+        [x-d, y-d, z],
+        [x-d, y+d, z]
+    ]).T
+
+    return np.asarray(np.dot(camera.R, corners))
+
+
 size = 300  # size of image in pixels
 center = size / 2
 intrinsic = np.array([
@@ -63,7 +78,6 @@ rotation_mat = transformers.rotation_3d_from_angles(120, 0, 60)
 translation_mat = np.matrix([0, 0, 5]).T
 c = camera.Camera(K=intrinsic, R=rotation_mat, t=translation_mat)
 
-print(c.extrinsic)
 # Project 3d points to camera1 on the left
 points1 = c.project(points3d)
 points1 = processor.cart2hom(points1)
@@ -122,30 +136,15 @@ for i, P2 in enumerate(P2s):
 print('True pose of c2 wrt c1: ', H_c1_c2)
 P2 = np.linalg.inv(np.vstack([P2s[ind], [0, 0, 0, 1]]))[:3, :4]
 P2f = structure.compute_P_from_fundamental(F)
-print('Calculated camera 2 parameters:' , P2, P2f)
+print('Calculated camera 2 parameters:', P2, P2f)
 
 tripoints3d = structure.reconstruct_points(points1n, points2n, P1, P2)
 tripoints3d = structure.linear_triangulation(points1n, points2n, P1, P2)
 
-plt.figure()
 structure.plot_epipolar_lines(points1n, points2n, E)
 plot_projections([points1, points2])
 
-def camera_corners(camera, dist=0.25):
-    d = dist
-    x, y, z = np.ravel(camera.t)
-    corners = np.array([
-        [x-d, y+d, z],
-        [x+d, y+d, z],
-        [x+d, y-d, z],
-        [x-d, y-d, z],
-        [x-d, y+d, z]
-    ]).T
-
-    return np.asarray(np.dot(camera.R, corners))
-
 ax = plot_cube(points3d, 'Original')
-
 cam_corners1 = camera_corners(c)
 cam_corners2 = camera_corners(c2)
 ax.plot(cam_corners1[0], cam_corners1[1], cam_corners1[2], 'g-')

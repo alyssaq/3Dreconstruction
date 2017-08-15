@@ -65,11 +65,14 @@ def compute_epipole(F):
 
 def plot_epipolar_lines(p1, p2, F, show_epipole=False):
     """ Plot the points and epipolar lines. P1' F P2 = 0 """
+    plt.figure()
+    plt.suptitle('Epipolar lines', fontsize=16)
+
     plt.subplot(1, 2, 1, aspect='equal')
     # Plot the epipolar lines on img1 with points p2 from the right side
     # L1 = F * p2
     plot_epipolar_line(p1, p2, F, show_epipole)
-    plt.subplot(1, 2, 2,  aspect='equal')
+    plt.subplot(1, 2, 2, aspect='equal')
     # Plot the epipolar lines on img2 with points p1 from the left side
     # L2 = F' * p1
     plot_epipolar_line(p2, p1, F.T, show_epipole)
