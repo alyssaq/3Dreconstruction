@@ -70,10 +70,10 @@ def dino():
     points2 = processor.cart2hom(pts2)
 
     plt.subplot(1, 2, 1)
-    plt.imshow(img1)
+    plt.imshow(cv2.cvtColor(img1, cv2.COLOR_BGR2RGB))
     plt.plot(points1[0], points1[1], 'r.')
     plt.subplot(1, 2, 2)
-    plt.imshow(img2)
+    plt.imshow(cv2.cvtColor(img2, cv2.COLOR_BGR2RGB))
     plt.plot(points2[0], points2[1], 'r.')
     plt.show()
 
@@ -115,11 +115,9 @@ for i, P2 in enumerate(P2s):
         ind = i
 
 P2 = np.linalg.inv(np.vstack([P2s[ind], [0, 0, 0, 1]]))[:3, :4]
-print(ind, P2)
-tripoints3d = structure.reconstruct_points(points1n, points2n, P1, P2)
-tripoints3d2 = structure.linear_triangulation(points1n, points2n, P1, P2)
+#tripoints3d = structure.reconstruct_points(points1n, points2n, P1, P2)
+tripoints3d = structure.linear_triangulation(points1n, points2n, P1, P2)
 
-print(tripoints3d[:, 1], tripoints3d2[:, 1])
 fig = plt.figure()
 fig.suptitle('3D reconstructed', fontsize=16)
 ax = fig.gca(projection='3d')
