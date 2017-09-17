@@ -21,7 +21,7 @@ def reconstruct_one_point(pt1, pt2, m1, m2):
         np.dot(skew(pt2), m2)
     ])
     U, S, V = np.linalg.svd(A)
-    P = np.ravel(V[-1, :])
+    P = np.ravel(V[-1, :4])
 
     return P / P[3]
 
@@ -30,7 +30,7 @@ def linear_triangulation(p1, p2, m1, m2):
     """
     Linear triangulation (Hartley ch 12.2 pg 312) to find the 3D point X
     where p1 = m1 * X and p2 = m2 * X. Solve AX = 0.
-    :param p1, p2: 2D points in homo. or catesian coordinates. Shape (2 x n)
+    :param p1, p2: 2D points in homo. or catesian coordinates. Shape (3 x n)
     :param m1, m2: Camera matrices associated with p1 and p2. Shape (3 x 4)
     :returns: 4 x n homogenous 3d triangulated points
     """
@@ -46,7 +46,7 @@ def linear_triangulation(p1, p2, m1, m2):
         ])
 
         _, _, V = np.linalg.svd(A)
-        X = V[-1, :]
+        X = V[-1, :4]
         res[:, i] = X / X[3]
 
     return res
