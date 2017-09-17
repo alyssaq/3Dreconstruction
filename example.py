@@ -69,13 +69,14 @@ def dino():
     points1 = processor.cart2hom(pts1)
     points2 = processor.cart2hom(pts2)
 
-    plt.subplot(1, 2, 1)
-    plt.imshow(cv2.cvtColor(img1, cv2.COLOR_BGR2RGB))
-    plt.plot(points1[0], points1[1], 'r.')
-    plt.subplot(1, 2, 2)
-    plt.imshow(cv2.cvtColor(img2, cv2.COLOR_BGR2RGB))
-    plt.plot(points2[0], points2[1], 'r.')
-    plt.show()
+    fig, ax = plt.subplots(1, 2)
+    ax[0].autoscale_view('tight')
+    ax[0].imshow(cv2.cvtColor(img1, cv2.COLOR_BGR2RGB))
+    ax[0].plot(points1[0], points1[1], 'r.')
+    ax[1].autoscale_view('tight')
+    ax[1].imshow(cv2.cvtColor(img2, cv2.COLOR_BGR2RGB))
+    ax[1].plot(points2[0], points2[1], 'r.')
+    fig.show()
 
     height, width, ch = img1.shape
     intrinsic = np.array([  # for dino
