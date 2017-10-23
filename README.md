@@ -29,7 +29,7 @@ Download images from <http://www.robots.ox.ac.uk/~vgg/data/data-mview.html> and 
 $ python3 example.py
 ```
 
-Deteted points and matched across 2 images.
+Detected points and matched across 2 images.
 ![](testsets/dino_2d_points.png?raw=true)
 
 3D reconstructed dino with essential matrix   
