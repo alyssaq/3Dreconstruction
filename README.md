@@ -13,7 +13,7 @@ Steps:
 5. Triangulate knowing that x1 = P1 * X and x2 = P2 * X.
 6. Bundle adjustment to minimize reprojection errors and refine the 3D coordinates.
 
-Note: Steps and code in this repo is my hobby / learning exercise. Ie, its probably not very efficient. If you wish to use a more-production ready library, check out OpenCV's SFM module. I have a docker environment for it at: https://github.com/alyssaq/reconstruction
+Note: Steps and code in this repo is my hobby / learning exercise. Ie, its probably not very efficient. If you wish to use a more production-ready library, check out [OpenCV's SFM module](https://github.com/opencv/opencv_contrib/tree/master/modules/sfm). I have a docker environment for it at: https://github.com/alyssaq/reconstruction
 
 ## Prerequisites
 * Python 3.5+
