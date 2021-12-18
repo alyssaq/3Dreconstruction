@@ -26,7 +26,7 @@ $ python3 cube_reconstruction.py
 ```
 
 ## Example Dino 3D reconstruction from 2D images
-Download images from <http://www.robots.ox.ac.uk/~vgg/data/data-mview.html> and place into `imgs/dinos`
+Download images from <https://www.robots.ox.ac.uk/~vgg/data/mview/> and place into `imgs/dinos`
 ```sh
 $ python3 example.py
 ```
